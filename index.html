@@ -23,7 +23,7 @@
         var Game = Game || {};
         Game.init = function(callback){
             Game.parameters = {};
-            reg = new RegExp(/[?&]([A-z0-9\s]+)=([A-z0-9\s]+)/g);
+            reg = new RegExp(/[?&]([A-z0-9\s]+)=([^?&]+)/g);
             param = reg.exec(location.search);
             while(param != null){
                 Game.parameters[param[1]] = param[2];
