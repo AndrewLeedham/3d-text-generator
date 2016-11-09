@@ -1,68 +1,107 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>3D Text Generator</title>
     <style>
-        body{
+        body {
             margin: 0;
             overflow: hidden;
         }
-        canvas{
+        
+        canvas {
             width: 100%;
             height: 100%;
         }
     </style>
 </head>
+
 <body>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r79/three.min.js"></script>
     <script>
         var Game = Game || {};
         Game.init = function(callback){
+            Game.parameters = {};
+            reg = new RegExp(/[?&]([A-z0-9\s]+)=([A-z0-9\s]+)/g);
+            param = reg.exec(location.search);
+            while(param != null){
+                Game.parameters[param[1]] = param[2];
+                param = reg.exec(location.search);
+            }
+            if(Object.keys(Game.parameters).length == 0){
+                text = prompt("Display text: ");
+                while(text == "" && text.length > 32){
+                    text = prompt("Display text: ", text);
+                }
+                Game.parameters["text"] = text;
 
-        Game.scene = new THREE.Scene();
+                colour = prompt("Text Colour (0xRRGGBB): ", "0xFFFFFF");
+                while(colour == "" && parseInt(colour) == NaN){
+                    colour = prompt("Text Colour (0xRRGGBB): ", colour);
+                }
+                Game.parameters["colour"] = colour;
 
-        Game.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                background = prompt("Background Colour (0xRRGGBB): ", "0x000000");
+                while(background == "" && parseInt(background) == NaN){
+                    background = prompt("Background Colour (0xRRGGBB): ", background);
+                }
+                Game.parameters["background"] = background;
 
-        Game.renderer = new THREE.WebGLRenderer();
-        Game.renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(Game.renderer.domElement);
+                url = "";
+                for(var key in Game.parameters){
+                    url += "&"+key+"="+escape(Game.parameters[key]);
+                }
+                url = url.replace("&", "?");
+                location.search = url;
+            }
 
-        Game.font = undefined;
-        var loader = new THREE.FontLoader();
 
-        loader.load("https://codepen.io/AndrewLeedham/pen/GNpgrq.js", function(response){
-            Game.font = response;
-            Game.shape(callback);
-        });
+            Game.text = Game.parameters["text"] || "Lorem Ipsum";
+            Game.textColour =  parseInt(Game.parameters["colour"]) || 0xFFFFFF;
+            Game.backgroundColour = parseInt(Game.parameters["background"]) || 0x000000;
+
+            Game.scene = new THREE.Scene();
+            Game.scene.background = new THREE.Color(Game.backgroundColour);
+            Game.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            Game.renderer = new THREE.WebGLRenderer();
+            Game.renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(Game.renderer.domElement);
+
+            Game.font = undefined;
+            var loader = new THREE.FontLoader();
+
+            loader.load("https://codepen.io/AndrewLeedham/pen/GNpgrq.js", function(response){
+                Game.font = response;
+                Game.shape(callback);
+            });
         }
 
         Game.shape = function(callback){
-
-        Game.geometry = new THREE.TextGeometry(unescape(location.search.split('text=')[1]), {font: Game.font, size: 1, height: 0.1});
-        // Game.geometry = new THREE.BoxGeometry(1, 1, 1);
-        Game.material = new THREE.MeshLambertMaterial({ color: 0xFFFFFF });
-        Game.mesh = new THREE.Mesh(Game.geometry, Game.material);
-        Game.meshBox = new THREE.Box3().setFromObject(Game.mesh);
-        console.log(Game.meshBox.size());
-        Game.mesh.geometry.translate(-Game.meshBox.size().x/2, - Game.meshBox.size().y/2, -Game.meshBox.size().z/2);
-        Game.scene.add(Game.mesh)
-        Game.camera.position.z = 5;
-        Game.light = new THREE.DirectionalLight(0xffffff, 1);
-        Game.light.position.set(0, 0, 5);
-        Game.light.target = Game.mesh;
-        Game.scene.add(Game.light);
-        callback();
+            Game.geometry = new THREE.TextGeometry(unescape(Game.text), {font: Game.font, size: 1, height: 0.1});
+            Game.material = new THREE.MeshLambertMaterial({ color: Game.textColour });
+            Game.mesh = new THREE.Mesh(Game.geometry, Game.material);
+            Game.meshBox = new THREE.Box3().setFromObject(Game.mesh);
+            console.log(Game.meshBox.size());
+            Game.mesh.geometry.translate(-Game.meshBox.size().x/2, - Game.meshBox.size().y/2, -Game.meshBox.size().z/2);
+            Game.scene.add(Game.mesh)
+            Game.camera.position.z = 5;
+            Game.light = new THREE.DirectionalLight(0xffffff, 1);
+            Game.light.position.set(0, 0, 5);
+            Game.light.target = Game.mesh;
+            Game.scene.add(Game.light);
+            callback();
         }
 
         Game.render = function(){
-        requestAnimationFrame(Game.render);
-        Game.mesh.rotation.y += 0.01;
-        Game.camera.lookAt(Game.mesh);
-        Game.renderer.render(Game.scene, Game.camera);
+            requestAnimationFrame(Game.render);
+            Game.mesh.rotation.y += 0.01;
+            Game.camera.lookAt(Game.mesh);
+            Game.renderer.render(Game.scene, Game.camera);
         }
 
         Game.init(Game.render);
     </script>
 </body>
+
 </html>
