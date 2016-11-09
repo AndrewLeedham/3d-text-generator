@@ -6,6 +6,7 @@
     <style>
         body{
             margin: 0;
+            overflow: hidden;
         }
         canvas{
             width: 100%;
@@ -38,7 +39,7 @@
 
         Game.shape = function(callback){
 
-        Game.geometry = new THREE.TextGeometry("A", {font: Game.font, size: 1, height: 0.1});
+        Game.geometry = new THREE.TextGeometry(location.search.split('text=')[1], {font: Game.font, size: 1, height: 0.1});
         // Game.geometry = new THREE.BoxGeometry(1, 1, 1);
         Game.material = new THREE.MeshLambertMaterial({ color: 0xFFFFFF });
         Game.mesh = new THREE.Mesh(Game.geometry, Game.material);
