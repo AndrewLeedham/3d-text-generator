@@ -71,7 +71,7 @@
             Game.font = undefined;
             var loader = new THREE.FontLoader();
 
-            loader.load("https://codepen.io/AndrewLeedham/pen/GNpgrq.js", function(response){
+            loader.load("./font.json", function(response){
                 Game.font = response;
                 Game.shape(callback);
             });
